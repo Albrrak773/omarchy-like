@@ -154,7 +154,6 @@ APT_PACKAGES=(
     "bat:batcat"
     "ripgrep:rg"
     "fd-find:fdfind"
-    "neovim:nvim"
     "btop:btop"
 )
 
@@ -191,6 +190,50 @@ fi
 if command_exists batcat && ! command_exists bat; then
     log_info "Creating bat symlink..."
     sudo ln -sf "$(command -v batcat)" /usr/local/bin/bat 2>/dev/null || true
+fi
+
+# ============================================================================
+# NEOVIM INSTALLATION (from GitHub, requires >= 0.11.2 for LazyVim)
+# ============================================================================
+
+if verify_binary nvim; then
+    log_success "neovim already installed and working"
+    VERIFIED_INSTALLED+=("neovim")
+else
+    log_info "Installing neovim..."
+    NVIM_ARCH="$GITHUB_ARCH"
+    case "$NVIM_ARCH" in
+        x86_64) NVIM_ARCH="x86_64" ;;
+        arm64)  NVIM_ARCH="arm64" ;;
+    esac
+    
+    NVIM_URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${NVIM_ARCH}.tar.gz"
+    
+    rm -rf /tmp/nvim.tar.gz
+    
+    if curl -fsSL "$NVIM_URL" -o /tmp/nvim.tar.gz; then
+        sudo rm -rf /opt/nvim
+        if sudo tar -xzf /tmp/nvim.tar.gz -C /opt; then
+            sudo ln -sf /opt/nvim-linux-${NVIM_ARCH}/bin/nvim /usr/local/bin/nvim
+            rm -f /tmp/nvim.tar.gz
+            
+            if verify_binary nvim; then
+                log_success "neovim installed and verified"
+                VERIFIED_INSTALLED+=("neovim")
+            else
+                log_error "neovim installed but verification failed"
+                VERIFIED_FAILED+=("neovim")
+            fi
+        else
+            log_error "Failed to extract neovim"
+            VERIFIED_FAILED+=("neovim")
+            rm -f /tmp/nvim.tar.gz
+        fi
+    else
+        log_error "Failed to download neovim from $NVIM_URL"
+        VERIFIED_FAILED+=("neovim")
+        rm -f /tmp/nvim.tar.gz
+    fi
 fi
 
 # ============================================================================
@@ -322,7 +365,7 @@ fi
 # OPENCODE INSTALLATION (official installer)
 # ============================================================================
 
-OPENCODE_PATH="$HOME/.local/bin/opencode"
+OPENCODE_PATH="$HOME/.opencode/bin/opencode"
 
 if [ -x "$OPENCODE_PATH" ]; then
     log_success "opencode already installed and working"
