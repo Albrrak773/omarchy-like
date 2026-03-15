@@ -148,13 +148,13 @@ APT_PACKAGES=(
     "git:git"
     "curl:curl"
     "wget:wget"
+    "gcc:gcc"
     "eza:eza"
     "zoxide:zoxide"
     "fzf:fzf"
     "bat:batcat"
     "ripgrep:rg"
     "fd-find:fdfind"
-    "neovim:nvim"
     "btop:btop"
 )
 
@@ -191,6 +191,29 @@ fi
 if command_exists batcat && ! command_exists bat; then
     log_info "Creating bat symlink..."
     sudo ln -sf "$(command -v batcat)" /usr/local/bin/bat 2>/dev/null || true
+fi
+
+# ============================================================================
+# NEOVIM INSTALLATION (via snap, requires >= 0.11.0 for LazyVim)
+# ============================================================================
+
+if verify_binary nvim; then
+    log_success "neovim already installed and working"
+    VERIFIED_INSTALLED+=("neovim")
+else
+    log_info "Installing neovim via snap..."
+    if sudo snap install nvim --classic; then
+        if verify_binary nvim; then
+            log_success "neovim installed and verified"
+            VERIFIED_INSTALLED+=("neovim")
+        else
+            log_error "neovim installed but verification failed"
+            VERIFIED_FAILED+=("neovim")
+        fi
+    else
+        log_error "Failed to install neovim"
+        VERIFIED_FAILED+=("neovim")
+    fi
 fi
 
 # ============================================================================
@@ -522,7 +545,6 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    { import = "plugins" },
   },
   defaults = { lazy = false, version = false },
   install = { missing = true },
@@ -536,9 +558,6 @@ require("lazy").setup({
   },
 })
 NVIMEOF
-    
-    mkdir -p "$NVIM_CONFIG_DIR/lua/config"
-    mkdir -p "$NVIM_CONFIG_DIR/lua/plugins"
     
     log_success "LazyVim bootstrap created (run nvim to complete setup)"
 fi
