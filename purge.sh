@@ -37,8 +37,8 @@ echo -e "${RED}    OMARCHY-LIKE PURGE SCRIPT${NC}"
 echo -e "${RED}========================================${NC}"
 echo ""
 echo -e "${YELLOW}This will remove:${NC}"
-echo "  • apt packages: eza, zoxide, fzf, bat, ripgrep, fd-find, btop"
-echo "  • binaries: starship, nvim, lazygit, lazydocker, opencode"
+echo "  • apt packages: eza, zoxide, fzf, bat, ripgrep, fd-find, neovim, btop"
+echo "  • binaries: starship, lazygit, lazydocker, opencode"
 echo "  • configs: ~/.config/{starship,btop,opencode,nvim}"
 echo "  • bashrc omarchy-like section"
 echo ""
@@ -53,7 +53,7 @@ fi
 # REMOVE APT PACKAGES
 # ============================================================================
 
-APT_PACKAGES=(eza zoxide fzf bat ripgrep fd-find btop)
+APT_PACKAGES=(eza zoxide fzf bat ripgrep fd-find neovim btop)
 
 log_info "Removing apt packages..."
 for pkg in "${APT_PACKAGES[@]}"; do
@@ -72,18 +72,10 @@ done
 log_info "Removing installed binaries..."
 
 sudo rm -f /usr/local/bin/starship && log_success "Removed starship"
-sudo rm -f /usr/local/bin/nvim && log_success "Removed nvim symlink"
 sudo rm -f /usr/local/bin/lazygit && log_success "Removed lazygit"
 sudo rm -f /usr/local/bin/lazydocker && log_success "Removed lazydocker"
 sudo rm -f /usr/local/bin/fd && log_success "Removed fd symlink"
 sudo rm -f /usr/local/bin/bat && log_success "Removed bat symlink"
-
-# ============================================================================
-# REMOVE NEOVIM FROM /OPT
-# ============================================================================
-
-log_info "Removing neovim from /opt..."
-sudo rm -rf /opt/nvim-linux-* && log_success "Removed neovim from /opt"
 
 # ============================================================================
 # REMOVE OPENCODE
@@ -139,8 +131,8 @@ echo -e "${GREEN}         PURGE COMPLETE${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "Removed:"
-echo "  • apt packages: eza, zoxide, fzf, bat, ripgrep, fd-find, btop"
-echo "  • binaries: starship, nvim, lazygit, lazydocker"
+echo "  • apt packages: eza, zoxide, fzf, bat, ripgrep, fd-find, neovim, btop"
+echo "  • binaries: starship, lazygit, lazydocker"
 echo "  • configs: starship, btop, opencode, nvim"
 echo "  • ~/.opencode"
 echo "  • bashrc omarchy-like section"
