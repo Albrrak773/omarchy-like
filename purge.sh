@@ -116,34 +116,29 @@ log_info "Removing bashrc configuration..."
 if [ -f ~/.bashrc ]; then
     cp ~/.bashrc ~/.bashrc.backup.$(date +%s)
     
-    if grep -q "OMARCHY-LIKE SHELL CONFIGURATION" ~/.bashrc 2>/dev/null; then
-        sed -i '/# OMARCHY-LIKE SHELL CONFIGURATION/,/# END OMARCHY-LIKE SHELL CONFIGURATION/d' ~/.bashrc
-        log_success "Removed bashrc configuration section"
-    fi
+    grep -v "OMARCHY-LIKE" ~/.bashrc | \
+    grep -v "starship" | \
+    grep -v "zoxide" | \
+    grep -v "alias cd=\"z\"" | \
+    grep -v "alias lg=" | \
+    grep -v "alias ld=" | \
+    grep -v "alias g=" | \
+    grep -v "alias gcm=" | \
+    grep -v "alias gcam=" | \
+    grep -v "alias c=" | \
+    grep -v "alias ls=.*eza" | \
+    grep -v "alias lsa=" | \
+    grep -v "alias lt=" | \
+    grep -v "alias lta=" | \
+    grep -v "alias ff=" | \
+    grep -v "alias eff=" | \
+    grep -v "alias \.\.=" | \
+    grep -v "alias \.\.\.=" | \
+    grep -v "alias \.\.\.\.=" | \
+    grep -v "^n() {" | \
+    grep -v "command nvim" > ~/.bashrc.tmp 2>/dev/null
     
-    sed -i '/starship/d' ~/.bashrc
-    sed -i '/zoxide/d' ~/.bashrc
-    sed -i '/alias cd="z"/d' ~/.bashrc
-    sed -i '/# EZA/,/^fi$/d' ~/.bashrc
-    sed -i '/# ZOXIDE/,/^fi$/d' ~/.bashrc
-    sed -i '/# FZF/,/^fi$/d' ~/.bashrc
-    sed -i '/# DIRECTORY NAVIGATION/,/^alias \.\.\.\.\.\.\./d' ~/.bashrc
-    sed -i '/# TOOLS/,/^n()/d' ~/.bashrc
-    sed -i '/^n() {/,/^}$/d' ~/.bashrc
-    sed -i '/alias lg=/d' ~/.bashrc
-    sed -i '/alias ld=/d' ~/.bashrc
-    sed -i '/alias g=/d' ~/.bashrc
-    sed -i '/alias gcm=/d' ~/.bashrc
-    sed -i '/alias gcam=/d' ~/.bashrc
-    sed -i '/alias c=/d' ~/.bashrc
-    sed -i '/alias ls=.*eza/d' ~/.bashrc
-    sed -i '/alias lsa=/d' ~/.bashrc
-    sed -i '/alias lt=.*eza/d' ~/.bashrc
-    sed -i '/alias lta=/d' ~/.bashrc
-    sed -i '/alias ff=/d' ~/.bashrc
-    sed -i '/alias eff=/d' ~/.bashrc
-    sed -i '/alias \.\.=/d' ~/.bashrc
-    sed -i '/alias \.\.\.=/d' ~/.bashrc
+    mv ~/.bashrc.tmp ~/.bashrc
     
     log_success "Cleaned bashrc (backup saved)"
 else
