@@ -194,7 +194,7 @@ if command_exists batcat && ! command_exists bat; then
 fi
 
 # ============================================================================
-# STARSHIP INSTALLATION (from GitHub)
+# STARSHIP INSTALLATION (official installer)
 # ============================================================================
 
 if verify_binary starship; then
@@ -202,35 +202,17 @@ if verify_binary starship; then
     VERIFIED_INSTALLED+=("starship")
 else
     log_info "Installing starship..."
-    STARSHIP_ARCH="$GITHUB_ARCH"
-    [ "$STARSHIP_ARCH" = "x86_64" ] && STARSHIP_ARCH="x86_64-unknown-linux-gnu"
-    [ "$STARSHIP_ARCH" = "arm64" ] && STARSHIP_ARCH="aarch64-unknown-linux-gnu"
-    
-    STARSHIP_URL="https://github.com/starship-rs/starship/releases/latest/download/starship-${STARSHIP_ARCH}.tar.gz"
-    
-    rm -f /tmp/starship.tar.gz /tmp/starship
-    
-    if curl -fsSL "$STARSHIP_URL" -o /tmp/starship.tar.gz; then
-        if tar -xzf /tmp/starship.tar.gz -C /tmp starship; then
-            sudo install -o root -g root -m 0755 /tmp/starship /usr/local/bin/starship
-            rm -f /tmp/starship.tar.gz /tmp/starship
-            
-            if verify_binary starship; then
-                log_success "starship installed and verified"
-                VERIFIED_INSTALLED+=("starship")
-            else
-                log_error "starship installed but verification failed"
-                VERIFIED_FAILED+=("starship")
-            fi
+    if curl -sS https://starship.rs/install.sh | sh; then
+        if verify_binary starship; then
+            log_success "starship installed and verified"
+            VERIFIED_INSTALLED+=("starship")
         else
-            log_error "Failed to extract starship"
+            log_error "starship installed but verification failed"
             VERIFIED_FAILED+=("starship")
-            rm -f /tmp/starship.tar.gz
         fi
     else
-        log_error "Failed to download starship from $STARSHIP_URL"
+        log_error "Failed to install starship"
         VERIFIED_FAILED+=("starship")
-        rm -f /tmp/starship.tar.gz
     fi
 fi
 
@@ -337,7 +319,7 @@ else
 fi
 
 # ============================================================================
-# OPENCODE INSTALLATION
+# OPENCODE INSTALLATION (official installer)
 # ============================================================================
 
 if verify_binary opencode; then
@@ -345,22 +327,7 @@ if verify_binary opencode; then
     VERIFIED_INSTALLED+=("opencode")
 else
     log_info "Installing opencode..."
-    
-    OC_ARCH="$GITHUB_ARCH"
-    case "$OC_ARCH" in
-        x86_64) OC_ARCH="amd64" ;;
-        arm64)  OC_ARCH="arm64" ;;
-    esac
-    
-    OPENCODE_URL="https://github.com/opencode-ai/opencode/releases/latest/download/opencode-linux-${OC_ARCH}"
-    
-    rm -f /tmp/opencode
-    
-    if curl -fsSL "$OPENCODE_URL" -o /tmp/opencode; then
-        chmod +x /tmp/opencode
-        sudo install -o root -g root -m 0755 /tmp/opencode /usr/local/bin/opencode
-        rm -f /tmp/opencode
-        
+    if curl -fsSL https://opencode.ai/install | bash; then
         if verify_binary opencode; then
             log_success "opencode installed and verified"
             VERIFIED_INSTALLED+=("opencode")
@@ -369,9 +336,8 @@ else
             VERIFIED_FAILED+=("opencode")
         fi
     else
-        log_error "Failed to download opencode from $OPENCODE_URL"
+        log_error "Failed to install opencode"
         VERIFIED_FAILED+=("opencode")
-        rm -f /tmp/opencode
     fi
 fi
 
@@ -455,7 +421,11 @@ cat > ~/.config/opencode/tui.json << 'EOF'
 EOF
 log_success "opencode config created"
 
-BASHRC_CONTENT='
+if grep -q "OMARCHY-LIKE SHELL CONFIGURATION" ~/.bashrc 2>/dev/null; then
+    log_warn "bashrc already contains omarchy-like config, skipping"
+else
+    cat >> ~/.bashrc << 'BASHRC_EOF'
+
 # ============================================================================
 # OMARCHY-LIKE SHELL CONFIGURATION
 # ============================================================================
@@ -466,10 +436,10 @@ BASHRC_CONTENT='
 # EZA (Modern ls replacement)
 # ----------------------------------------------------------------------------
 if command -v eza &> /dev/null; then
-    alias ls='"'"'eza -lh --group-directories-first --icons=auto'"'"'
-    alias lsa='"'"'ls -a'"'"'
-    alias lt='"'"'eza --tree --level=2 --long --icons --git'"'"'
-    alias lta='"'"'lt -a'"'"'
+    alias ls='eza -lh --group-directories-first --icons=auto'
+    alias lsa='ls -a'
+    alias lt='eza --tree --level=2 --long --icons --git'
+    alias lta='lt -a'
 fi
 
 # ----------------------------------------------------------------------------
@@ -484,29 +454,27 @@ fi
 # FZF (Fuzzy finder)
 # ----------------------------------------------------------------------------
 if command -v fzf &> /dev/null; then
-    alias ff="fzf --preview '"'"'bat --style=numbers --color=always {}'"'"'"
-    alias eff='"'"'$EDITOR \"$(ff)\"'"'"'
+    alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+    alias eff='$(fzf)'
 fi
 
 # ----------------------------------------------------------------------------
 # DIRECTORY NAVIGATION
 # ----------------------------------------------------------------------------
-alias ..='"'"'cd ..'"'"'
-alias ...='"'"'cd ../..'"'"'
-alias ....='"'"'cd ../../..'"'"'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
 
 # ----------------------------------------------------------------------------
 # TOOLS
 # ----------------------------------------------------------------------------
-alias n='"'"'nvim'"'"'
-alias lg='"'"'lazygit'"'"'
-alias ld='"'"'lazydocker'"'"'
-alias g='"'"'git'"'"'
-alias gcm='"'"'git commit -m'"'"'
-alias gcam='"'"'git commit -a -m'"'"'
-alias c='"'"'opencode'"'"'
+alias lg='lazygit'
+alias ld='lazydocker'
+alias g='git'
+alias gcm='git commit -m'
+alias gcam='git commit -a -m'
+alias c='opencode'
 
-# Quick neovim in current directory
 n() { if [ "$#" -eq 0 ]; then command nvim . ; else command nvim "$@"; fi; }
 
 # ----------------------------------------------------------------------------
@@ -515,12 +483,7 @@ n() { if [ "$#" -eq 0 ]; then command nvim . ; else command nvim "$@"; fi; }
 if command -v starship &> /dev/null; then
     eval "$(starship init bash)"
 fi
-'
-
-if grep -q "OMARCHY-LIKE SHELL CONFIGURATION" ~/.bashrc 2>/dev/null; then
-    log_warn "bashrc already contains omarchy-like config, skipping"
-else
-    echo "$BASHRC_CONTENT" >> ~/.bashrc
+BASHRC_EOF
     log_success "bashrc updated with omarchy-like config"
 fi
 
