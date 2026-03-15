@@ -22,6 +22,16 @@ After installation, activate the new shell configuration:
 source ~/.bashrc
 ```
 
+## Uninstall
+
+To remove everything installed by this script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Albrrak773/omarchy-like/main/purge.sh -o purge.sh
+chmod +x purge.sh
+./purge.sh
+```
+
 ## CLI TOOLS
 
 - **eza** - Modern ls replacement with icons, colors, git status, tree view
