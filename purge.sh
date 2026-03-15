@@ -110,13 +110,15 @@ rm -rf ~/.config/nvim && log_success "Removed neovim config"
 log_info "Removing bashrc configuration..."
 
 if grep -q "OMARCHY-LIKE SHELL CONFIGURATION" ~/.bashrc 2>/dev/null; then
-    sed -i '/^# ============================================================================
-# OMARCHY-LIKE SHELL CONFIGURATION/,/^# ============================================================================
-# END OMARCHY-LIKE SHELL CONFIGURATION/d' ~/.bashrc 2>/dev/null
+    sed -i '/# OMARCHY-LIKE SHELL CONFIGURATION/,/# END OMARCHY-LIKE SHELL CONFIGURATION/d' ~/.bashrc 2>/dev/null
     log_success "Removed bashrc configuration"
 else
     log_info "No omarchy-like config found in bashrc"
 fi
+
+sed -i '/starship init bash/d' ~/.bashrc 2>/dev/null
+sed -i '/zoxide init bash/d' ~/.bashrc 2>/dev/null
+sed -i '/alias cd="z"/d' ~/.bashrc 2>/dev/null
 
 # ============================================================================
 # REMOVE LAZY.NVIM DATA
