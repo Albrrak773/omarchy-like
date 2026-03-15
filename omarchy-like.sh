@@ -202,7 +202,7 @@ if verify_binary starship; then
     VERIFIED_INSTALLED+=("starship")
 else
     log_info "Installing starship..."
-    if curl -sS https://starship.rs/install.sh | sh; then
+    if curl -sS https://starship.rs/install.sh | sudo sh; then
         if verify_binary starship; then
             log_success "starship installed and verified"
             VERIFIED_INSTALLED+=("starship")
@@ -322,17 +322,19 @@ fi
 # OPENCODE INSTALLATION (official installer)
 # ============================================================================
 
-if verify_binary opencode; then
+OPENCODE_PATH="$HOME/.local/bin/opencode"
+
+if [ -x "$OPENCODE_PATH" ]; then
     log_success "opencode already installed and working"
     VERIFIED_INSTALLED+=("opencode")
 else
     log_info "Installing opencode..."
     if curl -fsSL https://opencode.ai/install | bash; then
-        if verify_binary opencode; then
+        if [ -x "$OPENCODE_PATH" ]; then
             log_success "opencode installed and verified"
             VERIFIED_INSTALLED+=("opencode")
         else
-            log_error "opencode installed but verification failed"
+            log_error "opencode installed but binary not found at $OPENCODE_PATH"
             VERIFIED_FAILED+=("opencode")
         fi
     else
@@ -483,6 +485,10 @@ n() { if [ "$#" -eq 0 ]; then command nvim . ; else command nvim "$@"; fi; }
 if command -v starship &> /dev/null; then
     eval "$(starship init bash)"
 fi
+
+# ============================================================================
+# END OMARCHY-LIKE SHELL CONFIGURATION
+# ============================================================================
 BASHRC_EOF
     log_success "bashrc updated with omarchy-like config"
 fi
